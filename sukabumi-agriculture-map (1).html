@@ -1,397 +1,1245 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Analisis Lahan Pertanian Sukabumi</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
+    />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+      }
+      .container {
+        max-width: 1600px;
+        margin: 0 auto;
+      }
+      .header {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+      .header h1 {
+        color: #2c3e50;
+        font-size: 26px;
+        margin-bottom: 8px;
+      }
+      .header p {
+        color: #7f8c8d;
+        font-size: 14px;
+        margin-bottom: 5px;
+      }
+      .student-info {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 18px;
+        border-radius: 8px;
+        margin-top: 12px;
+        font-size: 13px;
+        display: inline-block;
+      }
+      .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 20px;
+      }
+      .map-wrapper {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        height: 700px;
+      }
+      .map-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 18px 25px;
+        font-weight: bold;
+        font-size: 18px;
+      }
+      #map {
+        height: calc(100% - 60px);
+        width: 100%;
+      }
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .info-panel {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+      .info-panel h2 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        font-size: 13px;
+        padding: 8px;
+        border-radius: 6px;
+        background: #f8f9fa;
+        transition: all 0.3s;
+        cursor: pointer;
+      }
+      .legend-item:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+      }
+      .legend-color {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        margin-right: 12px;
+        border: 3px solid #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        flex-shrink: 0;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 15px;
+      }
+      .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        transition: transform 0.3s;
+        cursor: pointer;
+      }
+      .stat-card:hover {
+        transform: translateY(-5px);
+      }
+      .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      .stat-label {
+        font-size: 11px;
+        opacity: 0.9;
+      }
+
+      /* Custom Popup Styling */
+      .custom-popup .leaflet-popup-content-wrapper {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        padding: 0;
+        overflow: hidden;
+      }
+      .custom-popup .leaflet-popup-content {
+        margin: 0;
+        min-width: 280px;
+      }
+      .popup-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        font-weight: bold;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .popup-body {
+        padding: 15px;
+      }
+      .popup-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 13px;
+      }
+      .popup-row:last-child {
+        border-bottom: none;
+      }
+      .popup-label {
+        font-weight: 600;
+        color: #7f8c8d;
+      }
+      .popup-value {
+        color: #2c3e50;
+        font-weight: 500;
+      }
+      .popup-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+      .badge-s1 {
+        background: #d4edda;
+        color: #155724;
+      }
+      .badge-s2 {
+        background: #cce5ff;
+        color: #004085;
+      }
+      .badge-s3 {
+        background: #fff3cd;
+        color: #856404;
+      }
+      .badge-n {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      .popup-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .popup-btn {
+        flex: 1;
+        padding: 8px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+      .btn-secondary {
+        background: #f8f9fa;
+        color: #495057;
+        border: 1px solid #dee2e6;
+      }
+      .btn-secondary:hover {
+        background: #e9ecef;
+      }
+
+      /* Custom Tooltip */
+      .leaflet-tooltip {
+        background: rgba(44, 62, 80, 0.95);
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 6px 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+      .leaflet-tooltip-left:before {
+        border-left-color: rgba(44, 62, 80, 0.95);
+      }
+      .leaflet-tooltip-right:before {
+        border-right-color: rgba(44, 62, 80, 0.95);
+      }
+
+      /* Custom Marker Animation */
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
         }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
+        50% {
+          transform: translateY(-10px);
         }
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
+      }
+      .marker-bounce {
+        animation: bounce 1s ease-in-out;
+      }
+
+      /* Pulse Animation untuk marker aktif */
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
         }
-        .header {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        70% {
+          box-shadow: 0 0 0 15px rgba(102, 126, 234, 0);
         }
-        .header h1 {
-            color: #2c3e50;
-            font-size: 26px;
-            margin-bottom: 8px;
+        100% {
+          box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
         }
-        .header p {
-            color: #7f8c8d;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-        .student-info {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px 18px;
-            border-radius: 8px;
-            margin-top: 12px;
-            font-size: 13px;
-            display: inline-block;
-        }
+      }
+
+      .activity-log {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 15px;
+        max-height: 200px;
+        overflow-y: auto;
+        font-size: 11px;
+      }
+      .log-item {
+        padding: 6px;
+        background: white;
+        margin-bottom: 5px;
+        border-radius: 4px;
+        border-left: 3px solid #667eea;
+      }
+      .log-time {
+        color: #95a5a6;
+        font-size: 10px;
+      }
+
+      @media (max-width: 1200px) {
         .content-grid {
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 20px;
+          grid-template-columns: 1fr;
         }
         .map-wrapper {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            height: 700px;
+          height: 500px;
         }
-        .map-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 18px 25px;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        #map {
-            height: calc(100% - 60px);
-            width: 100%;
-        }
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .info-panel {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        .info-panel h2 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            font-size: 13px;
-            padding: 8px;
-            border-radius: 6px;
-            background: #f8f9fa;
-        }
-        .legend-color {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            margin-right: 12px;
-            border: 3px solid #fff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            flex-shrink: 0;
-        }
-        .legend-line {
-            width: 30px;
-            height: 4px;
-            margin-right: 12px;
-            flex-shrink: 0;
-        }
-        .legend-polygon {
-            width: 24px;
-            height: 24px;
-            margin-right: 12px;
-            border: 2px solid;
-            flex-shrink: 0;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .stat-label {
-            font-size: 11px;
-            opacity: 0.9;
-        }
-        .layer-info {
-            background: #e3f2fd;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-size: 12px;
-            border-left: 4px solid #2196f3;
-        }
-        .feature-item {
-            padding: 8px;
-            background: #f8f9fa;
-            margin-bottom: 5px;
-            border-radius: 5px;
-            font-size: 12px;
-        }
-        @media (max-width: 1200px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-            .map-wrapper {
-                height: 500px;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="header">
-            <h1>🌾 Sistem Informasi Geografis Kesesuaian Lahan Pertanian</h1>
-            <p>Kabupaten Sukabumi, Jawa Barat - Analisis Multi-Layer Geospasial</p>
-            <p style="font-size: 12px; color: #95a5a6;">Sistem ini mengintegrasikan data spasial untuk menentukan zonasi kesesuaian lahan pertanian berkelanjutan</p>
-            <div class="student-info">
-                <strong>📚 Tugas GIS</strong> | Nama: Rian Ependi | NIM: 20230040110 | Kelas: TI23H
-            </div>
+      <div class="header">
+        <h1>🌾 Sistem Informasi Geografis Kesesuaian Lahan Pertanian</h1>
+        <p>
+          Kabupaten Sukabumi, Jawa Barat - Analisis Multi-Layer Geospasial
+          Interaktif
+        </p>
+        <p style="font-size: 12px; color: #95a5a6">
+          Klik marker untuk detail lengkap | Hover untuk preview cepat |
+          Interaksi real-time
+        </p>
+        <div class="student-info">
+          <strong>📚 Tugas GIS</strong> | Nama: Rian Ependi | NIM: 20230040110 |
+          Kelas: TI23H
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <div class="map-wrapper">
+          <div class="map-header">
+            🗺️ Peta Interaktif Analisis Kesesuaian Lahan
+          </div>
+          <div id="map"></div>
         </div>
 
-        <div class="content-grid">
-            <div class="map-wrapper">
-                <div class="map-header">
-                    🗺️ Peta Interaktif Analisis Kesesuaian Lahan
-                </div>
-                <div id="map"></div>
+        <div class="sidebar">
+          <div class="info-panel">
+            <h2>📊 Statistik Real-time</h2>
+            <div class="stats-grid">
+              <div
+                class="stat-card"
+                onclick="alert('Total 8 zona telah dianalisis dengan parameter lengkap')"
+              >
+                <div class="stat-value" id="stat-zones">8</div>
+                <div class="stat-label">Zona Analisis</div>
+              </div>
+              <div
+                class="stat-card"
+                onclick="alert('3 jalur irigasi primer dan sekunder aktif')"
+              >
+                <div class="stat-value" id="stat-irrigation">3</div>
+                <div class="stat-label">Jalur Irigasi</div>
+              </div>
+              <div
+                class="stat-card"
+                onclick="alert('Total area produktif: 1,530 hektar')"
+              >
+                <div class="stat-value" id="stat-area">4</div>
+                <div class="stat-label">Area Pertanian</div>
+              </div>
+              <div class="stat-card" onclick="alert('Klik: 0 | Hover: 0')">
+                <div class="stat-value" id="stat-interactions">0</div>
+                <div class="stat-label">Interaksi</div>
+              </div>
             </div>
+          </div>
 
-            <div class="sidebar">
-                <div class="info-panel">
-                    <h2>📊 Statistik Project</h2>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-value">8</div>
-                            <div class="stat-label">Zona Analisis</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">3</div>
-                            <div class="stat-label">Jalur Irigasi</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">4</div>
-                            <div class="stat-label">Area Pertanian</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">5</div>
-                            <div class="stat-label">Layer Aktif</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="info-panel">
-                    <h2>🎨 Legenda Kesesuaian Lahan</h2>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #2ecc71;"></div>
-                        <span><strong>S1</strong> - Sangat Sesuai</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #3498db;"></div>
-                        <span><strong>S2</strong> - Sesuai</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #f39c12;"></div>
-                        <span><strong>S3</strong> - Sesuai Marginal</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #e74c3c;"></div>
-                        <span><strong>N</strong> - Tidak Sesuai</span>
-                    </div>
-                </div>
-
-                <div class="info-panel">
-                    <h2>📍 Layer Overlay</h2>
-                    <div class="legend-item">
-                        <div class="legend-line" style="background: #3498db; height: 3px;"></div>
-                        <span>Jalur Irigasi</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-polygon" style="background: rgba(46, 204, 113, 0.3); border-color: #27ae60;"></div>
-                        <span>Zona Pertanian</span>
-                    </div>
-                    
-                    <div class="layer-info">
-                        <strong>💡 Tips:</strong> Gunakan kontrol layer di pojok kanan atas untuk mengatur tampilan base map dan overlay sesuai kebutuhan analisis Anda.
-                    </div>
-                </div>
-
-                <div class="info-panel">
-                    <h2>ℹ️ Informasi Layer</h2>
-                    <div class="feature-item">
-                        <strong>Base Maps:</strong><br>
-                        • OpenStreetMap (Default)<br>
-                        • Satellite Imagery (ESRI)
-                    </div>
-                    <div class="feature-item">
-                        <strong>Overlay Layers:</strong><br>
-                        • Marker: Titik Analisis Lahan<br>
-                        • Polyline: Jalur Irigasi<br>
-                        • Polygon: Zona Pertanian
-                    </div>
-                </div>
+          <div class="info-panel">
+            <h2>🎨 Legenda Interaktif</h2>
+            <div
+              class="legend-item"
+              onclick="filterByClass('S1')"
+              title="Klik untuk filter zona S1"
+            >
+              <div class="legend-color" style="background: #2ecc71"></div>
+              <span><strong>S1</strong> - Sangat Sesuai (3 zona)</span>
             </div>
+            <div
+              class="legend-item"
+              onclick="filterByClass('S2')"
+              title="Klik untuk filter zona S2"
+            >
+              <div class="legend-color" style="background: #3498db"></div>
+              <span><strong>S2</strong> - Sesuai (4 zona)</span>
+            </div>
+            <div
+              class="legend-item"
+              onclick="filterByClass('S3')"
+              title="Klik untuk filter zona S3"
+            >
+              <div class="legend-color" style="background: #f39c12"></div>
+              <span><strong>S3</strong> - Sesuai Marginal (1 zona)</span>
+            </div>
+            <div
+              class="legend-item"
+              onclick="filterByClass('N')"
+              title="Klik untuk filter zona N"
+            >
+              <div class="legend-color" style="background: #e74c3c"></div>
+              <span><strong>N</strong> - Tidak Sesuai (1 zona)</span>
+            </div>
+            <button
+              onclick="resetFilter()"
+              style="
+                width: 100%;
+                padding: 10px;
+                margin-top: 10px;
+                background: #667eea;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: bold;
+              "
+            >
+              🔄 Reset Filter
+            </button>
+          </div>
+
+          <div class="info-panel">
+            <h2>📝 Log Aktivitas</h2>
+            <div class="activity-log" id="activity-log">
+              <div class="log-item">
+                <div class="log-time">Baru saja</div>
+                <div>Peta berhasil dimuat dengan 15 layer</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-panel">
+            <h2>ℹ️ Panduan Interaksi</h2>
+            <div style="font-size: 12px; line-height: 1.8; color: #7f8c8d">
+              <strong>🖱️ Hover:</strong> Lihat preview informasi<br />
+              <strong>👆 Klik Marker:</strong> Detail lengkap zona<br />
+              <strong>📊 Klik Statistik:</strong> Info tambahan<br />
+              <strong>🎨 Klik Legenda:</strong> Filter berdasarkan kelas<br />
+              <strong>🗺️ Layer Control:</strong> Toggle base map & overlay
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
     <script>
-        // Data GeoJSON
-        const titikAnalisisData = {
-            "type": "FeatureCollection",
-            "features": [
-                {"type": "Feature", "properties": {"nama": "Zona Pertanian Cibadak", "kesesuaian": "S1", "komoditas": "Padi, Sayuran", "kemiringan": "0-8%", "jenis_tanah": "Aluvial", "curah_hujan": "2500 mm/tahun", "luas": "450 ha"}, "geometry": {"type": "Point", "coordinates": [106.9278, -6.8833]}},
-                {"type": "Feature", "properties": {"nama": "Zona Pertanian Cisaat", "kesesuaian": "S2", "komoditas": "Teh, Kopi", "kemiringan": "15-25%", "jenis_tanah": "Andosol", "curah_hujan": "3000 mm/tahun", "luas": "320 ha"}, "geometry": {"type": "Point", "coordinates": [106.9500, -6.8000]}},
-                {"type": "Feature", "properties": {"nama": "Zona Pertanian Palabuhanratu", "kesesuaian": "S1", "komoditas": "Kelapa, Pisang", "kemiringan": "0-8%", "jenis_tanah": "Aluvial Pantai", "curah_hujan": "2800 mm/tahun", "luas": "580 ha"}, "geometry": {"type": "Point", "coordinates": [106.5431, -6.9900]}},
-                {"type": "Feature", "properties": {"nama": "Zona Pertanian Cicurug", "kesesuaian": "S2", "komoditas": "Padi, Jagung", "kemiringan": "8-15%", "jenis_tanah": "Latosol", "curah_hujan": "2600 mm/tahun", "luas": "380 ha"}, "geometry": {"type": "Point", "coordinates": [106.7833, -6.7833]}},
-                {"type": "Feature", "properties": {"nama": "Zona Pertanian Jampang", "kesesuaian": "S3", "komoditas": "Ubi Kayu, Jagung", "kemiringan": "25-40%", "jenis_tanah": "Podsolik", "curah_hujan": "2200 mm/tahun", "luas": "210 ha"}, "geometry": {"type": "Point", "coordinates": [106.6500, -7.1000]}},
-                {"type": "Feature", "properties": {"nama": "Zona Pertanian Cisolok", "kesesuaian": "S1", "komoditas": "Manggis, Durian", "kemiringan": "8-15%", "jenis_tanah": "Latosol", "curah_hujan": "2900 mm/tahun", "luas": "290 ha"}, "geometry": {"type": "Point", "coordinates": [106.6667, -7.0500]}},
-                {"type": "Feature", "properties": {"nama": "Zona Pertanian Surade", "kesesuaian": "S2", "komoditas": "Kakao, Kopi", "kemiringan": "15-25%", "jenis_tanah": "Andosol", "curah_hujan": "2700 mm/tahun", "luas": "340 ha"}, "geometry": {"type": "Point", "coordinates": [106.5167, -7.0167]}},
-                {"type": "Feature", "properties": {"nama": "Zona Gunungguruh", "kesesuaian": "N", "komoditas": "Hutan Lindung", "kemiringan": ">40%", "jenis_tanah": "Litosol", "curah_hujan": "3500 mm/tahun", "luas": "0 ha"}, "geometry": {"type": "Point", "coordinates": [107.0500, -6.8500]}}
-            ]
-        };
+      // Global variables
+      let interactionCount = 0;
+      let allMarkers = [];
 
-        const jalurIrigasiData = {
-            "type": "FeatureCollection",
-            "features": [
-                {"type": "Feature", "properties": {"nama": "Saluran Irigasi Cibadak Utara", "jenis": "Saluran Primer", "panjang": "8.5 km", "kondisi": "Baik", "kapasitas": "2.5 m³/detik"}, "geometry": {"type": "LineString", "coordinates": [[106.9100, -6.8700], [106.9200, -6.8750], [106.9278, -6.8833], [106.9350, -6.8900], [106.9400, -6.8950]]}},
-                {"type": "Feature", "properties": {"nama": "Saluran Irigasi Cicurug", "jenis": "Saluran Sekunder", "panjang": "5.2 km", "kondisi": "Baik", "kapasitas": "1.8 m³/detik"}, "geometry": {"type": "LineString", "coordinates": [[106.7700, -6.7750], [106.7833, -6.7833], [106.7900, -6.7900], [106.8000, -6.7950]]}},
-                {"type": "Feature", "properties": {"nama": "Saluran Irigasi Palabuhanratu", "jenis": "Saluran Primer", "panjang": "6.8 km", "kondisi": "Sedang", "kapasitas": "2.0 m³/detik"}, "geometry": {"type": "LineString", "coordinates": [[106.5300, -6.9850], [106.5431, -6.9900], [106.5500, -6.9950], [106.5600, -7.0000]]}}
-            ]
-        };
+      // Data GeoJSON
+      const titikAnalisisData = {
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            properties: {
+              id: 1,
+              nama: "Zona Pertanian Cibadak",
+              kesesuaian: "S1",
+              komoditas: "Padi, Sayuran",
+              kemiringan: "0-8%",
+              jenis_tanah: "Aluvial",
+              curah_hujan: "2500 mm/tahun",
+              luas: "450 ha",
+              produktivitas: "Sangat Tinggi",
+              rekomendasi: "Ideal untuk padi sawah intensif",
+            },
+            geometry: { type: "Point", coordinates: [106.9278, -6.8833] },
+          },
+          {
+            type: "Feature",
+            properties: {
+              id: 2,
+              nama: "Zona Pertanian Cisaat",
+              kesesuaian: "S2",
+              komoditas: "Teh, Kopi",
+              kemiringan: "15-25%",
+              jenis_tanah: "Andosol",
+              curah_hujan: "3000 mm/tahun",
+              luas: "320 ha",
+              produktivitas: "Tinggi",
+              rekomendasi: "Cocok untuk perkebunan dataran tinggi",
+            },
+            geometry: { type: "Point", coordinates: [106.95, -6.8] },
+          },
+          {
+            type: "Feature",
+            properties: {
+              id: 3,
+              nama: "Zona Pertanian Palabuhanratu",
+              kesesuaian: "S1",
+              komoditas: "Kelapa, Pisang",
+              kemiringan: "0-8%",
+              jenis_tanah: "Aluvial Pantai",
+              curah_hujan: "2800 mm/tahun",
+              luas: "580 ha",
+              produktivitas: "Sangat Tinggi",
+              rekomendasi: "Optimal untuk tanaman pesisir",
+            },
+            geometry: { type: "Point", coordinates: [106.5431, -6.99] },
+          },
+          {
+            type: "Feature",
+            properties: {
+              id: 4,
+              nama: "Zona Pertanian Cicurug",
+              kesesuaian: "S2",
+              komoditas: "Padi, Jagung",
+              kemiringan: "8-15%",
+              jenis_tanah: "Latosol",
+              curah_hujan: "2600 mm/tahun",
+              luas: "380 ha",
+              produktivitas: "Tinggi",
+              rekomendasi: "Baik dengan konservasi lahan",
+            },
+            geometry: { type: "Point", coordinates: [106.7833, -6.7833] },
+          },
+          {
+            type: "Feature",
+            properties: {
+              id: 5,
+              nama: "Zona Pertanian Jampang",
+              kesesuaian: "S3",
+              komoditas: "Ubi Kayu, Jagung",
+              kemiringan: "25-40%",
+              jenis_tanah: "Podsolik",
+              curah_hujan: "2200 mm/tahun",
+              luas: "210 ha",
+              produktivitas: "Sedang",
+              rekomendasi: "Perlu konservasi intensif",
+            },
+            geometry: { type: "Point", coordinates: [106.65, -7.1] },
+          },
+          {
+            type: "Feature",
+            properties: {
+              id: 6,
+              nama: "Zona Pertanian Cisolok",
+              kesesuaian: "S1",
+              komoditas: "Manggis, Durian",
+              kemiringan: "8-15%",
+              jenis_tanah: "Latosol",
+              curah_hujan: "2900 mm/tahun",
+              luas: "290 ha",
+              produktivitas: "Sangat Tinggi",
+              rekomendasi: "Premium untuk buah tropis",
+            },
+            geometry: { type: "Point", coordinates: [106.6667, -7.05] },
+          },
+          {
+            type: "Feature",
+            properties: {
+              id: 7,
+              nama: "Zona Pertanian Surade",
+              kesesuaian: "S2",
+              komoditas: "Kakao, Kopi",
+              kemiringan: "15-25%",
+              jenis_tanah: "Andosol",
+              curah_hujan: "2700 mm/tahun",
+              luas: "340 ha",
+              produktivitas: "Tinggi",
+              rekomendasi: "Ideal untuk sistem agroforestri",
+            },
+            geometry: { type: "Point", coordinates: [106.5167, -7.0167] },
+          },
+          {
+            type: "Feature",
+            properties: {
+              id: 8,
+              nama: "Zona Gunungguruh",
+              kesesuaian: "N",
+              komoditas: "Hutan Lindung",
+              kemiringan: ">40%",
+              jenis_tanah: "Litosol",
+              curah_hujan: "3500 mm/tahun",
+              luas: "0 ha",
+              produktivitas: "Tidak Ada",
+              rekomendasi: "Harus dipertahankan sebagai kawasan konservasi",
+            },
+            geometry: { type: "Point", coordinates: [107.05, -6.85] },
+          },
+        ],
+      };
 
-        const zonaAreaData = {
-            "type": "FeatureCollection",
-            "features": [
-                {"type": "Feature", "properties": {"nama": "Kawasan Pertanian Cibadak", "jenis": "Lahan Sawah Irigasi", "luas": "450 ha", "status": "Produktif", "komoditas": "Padi"}, "geometry": {"type": "Polygon", "coordinates": [[[106.9150, -6.8750], [106.9400, -6.8750], [106.9400, -6.8950], [106.9150, -6.8950], [106.9150, -6.8750]]]}},
-                {"type": "Feature", "properties": {"nama": "Kawasan Perkebunan Cisaat", "jenis": "Perkebunan Teh", "luas": "320 ha", "status": "Produktif", "komoditas": "Teh"}, "geometry": {"type": "Polygon", "coordinates": [[[106.9350, -6.7900], [106.9650, -6.7900], [106.9650, -6.8100], [106.9350, -6.8100], [106.9350, -6.7900]]]}},
-                {"type": "Feature", "properties": {"nama": "Kawasan Pertanian Palabuhanratu", "jenis": "Lahan Sawah & Hortikultura", "luas": "580 ha", "status": "Produktif", "komoditas": "Padi, Sayuran"}, "geometry": {"type": "Polygon", "coordinates": [[[106.5200, -6.9850], [106.5650, -6.9850], [106.5650, -7.0050], [106.5200, -7.0050], [106.5200, -6.9850]]]}},
-                {"type": "Feature", "properties": {"nama": "Kawasan Pertanian Cicurug", "jenis": "Lahan Sawah Tadah Hujan", "luas": "380 ha", "status": "Produktif", "komoditas": "Padi, Jagung"}, "geometry": {"type": "Polygon", "coordinates": [[[106.7650, -6.7750], [106.8050, -6.7750], [106.8050, -6.7950], [106.7650, -6.7950], [106.7650, -6.7750]]]}}
-            ]
-        };
+      const jalurIrigasiData = {
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            properties: {
+              nama: "Saluran Irigasi Cibadak Utara",
+              jenis: "Saluran Primer",
+              panjang: "8.5 km",
+              kondisi: "Baik",
+              kapasitas: "2.5 m³/detik",
+              tahun: "2018",
+            },
+            geometry: {
+              type: "LineString",
+              coordinates: [
+                [106.91, -6.87],
+                [106.92, -6.875],
+                [106.9278, -6.8833],
+                [106.935, -6.89],
+                [106.94, -6.895],
+              ],
+            },
+          },
+          {
+            type: "Feature",
+            properties: {
+              nama: "Saluran Irigasi Cicurug",
+              jenis: "Saluran Sekunder",
+              panjang: "5.2 km",
+              kondisi: "Baik",
+              kapasitas: "1.8 m³/detik",
+              tahun: "2020",
+            },
+            geometry: {
+              type: "LineString",
+              coordinates: [
+                [106.77, -6.775],
+                [106.7833, -6.7833],
+                [106.79, -6.79],
+                [106.8, -6.795],
+              ],
+            },
+          },
+          {
+            type: "Feature",
+            properties: {
+              nama: "Saluran Irigasi Palabuhanratu",
+              jenis: "Saluran Primer",
+              panjang: "6.8 km",
+              kondisi: "Sedang",
+              kapasitas: "2.0 m³/detik",
+              tahun: "2015",
+            },
+            geometry: {
+              type: "LineString",
+              coordinates: [
+                [106.53, -6.985],
+                [106.5431, -6.99],
+                [106.55, -6.995],
+                [106.56, -7.0],
+              ],
+            },
+          },
+        ],
+      };
 
-        // Fungsi helper
-        function getMarkerColor(k) {
-            return k === 'S1' ? '#2ecc71' : k === 'S2' ? '#3498db' : k === 'S3' ? '#f39c12' : '#e74c3c';
+      const zonaAreaData = {
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            properties: {
+              nama: "Kawasan Pertanian Cibadak",
+              jenis: "Lahan Sawah Irigasi",
+              luas: "450 ha",
+              status: "Produktif",
+              komoditas: "Padi",
+              petani: "450 KK",
+            },
+            geometry: {
+              type: "Polygon",
+              coordinates: [
+                [
+                  [106.915, -6.875],
+                  [106.94, -6.875],
+                  [106.94, -6.895],
+                  [106.915, -6.895],
+                  [106.915, -6.875],
+                ],
+              ],
+            },
+          },
+          {
+            type: "Feature",
+            properties: {
+              nama: "Kawasan Perkebunan Cisaat",
+              jenis: "Perkebunan Teh",
+              luas: "320 ha",
+              status: "Produktif",
+              komoditas: "Teh",
+              petani: "280 KK",
+            },
+            geometry: {
+              type: "Polygon",
+              coordinates: [
+                [
+                  [106.935, -6.79],
+                  [106.965, -6.79],
+                  [106.965, -6.81],
+                  [106.935, -6.81],
+                  [106.935, -6.79],
+                ],
+              ],
+            },
+          },
+          {
+            type: "Feature",
+            properties: {
+              nama: "Kawasan Pertanian Palabuhanratu",
+              jenis: "Lahan Sawah & Hortikultura",
+              luas: "580 ha",
+              status: "Produktif",
+              komoditas: "Padi, Sayuran",
+              petani: "620 KK",
+            },
+            geometry: {
+              type: "Polygon",
+              coordinates: [
+                [
+                  [106.52, -6.985],
+                  [106.565, -6.985],
+                  [106.565, -7.005],
+                  [106.52, -7.005],
+                  [106.52, -6.985],
+                ],
+              ],
+            },
+          },
+          {
+            type: "Feature",
+            properties: {
+              nama: "Kawasan Pertanian Cicurug",
+              jenis: "Lahan Sawah Tadah Hujan",
+              luas: "380 ha",
+              status: "Produktif",
+              komoditas: "Padi, Jagung",
+              petani: "340 KK",
+            },
+            geometry: {
+              type: "Polygon",
+              coordinates: [
+                [
+                  [106.765, -6.775],
+                  [106.805, -6.775],
+                  [106.805, -6.795],
+                  [106.765, -6.795],
+                  [106.765, -6.775],
+                ],
+              ],
+            },
+          },
+        ],
+      };
+
+      // Fungsi untuk log aktivitas
+      function addLog(message) {
+        const logDiv = document.getElementById("activity-log");
+        const logItem = document.createElement("div");
+        logItem.className = "log-item";
+        const now = new Date().toLocaleTimeString("id-ID");
+        logItem.innerHTML = `<div class="log-time">${now}</div><div>${message}</div>`;
+        logDiv.insertBefore(logItem, logDiv.firstChild);
+
+        // Keep only last 10 logs
+        while (logDiv.children.length > 10) {
+          logDiv.removeChild(logDiv.lastChild);
         }
+      }
 
-        function createCustomMarker(c) {
-            return L.divIcon({
-                className: 'custom-marker',
-                html: `<div style="background: ${c}; width: 28px; height: 28px; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.4);"></div>`,
-                iconSize: [28, 28],
-                iconAnchor: [14, 14]
-            });
-        }
+      // Update interaction counter
+      function updateInteraction() {
+        interactionCount++;
+        document.getElementById("stat-interactions").textContent =
+          interactionCount;
+      }
 
-        function createPopup(p, t) {
-            let h = '<div style="font-family: Arial; min-width: 220px;">';
-            if (t === 'm') {
-                const kl = {'S1': 'Sangat Sesuai', 'S2': 'Sesuai', 'S3': 'Sesuai Marginal', 'N': 'Tidak Sesuai'};
-                h += `<h3 style="margin: 0 0 12px 0; color: #2c3e50; font-size: 16px; border-bottom: 2px solid ${getMarkerColor(p.kesesuaian)}; padding-bottom: 8px;">📍 ${p.nama}</h3>
-                <table style="width: 100%; font-size: 13px; line-height: 1.8;">
-                <tr><td><strong>Kesesuaian:</strong></td><td><span style="color: ${getMarkerColor(p.kesesuaian)}; font-weight: bold;">${kl[p.kesesuaian]}</span></td></tr>
-                <tr><td><strong>Komoditas:</strong></td><td>${p.komoditas}</td></tr>
-                <tr><td><strong>Luas Lahan:</strong></td><td>${p.luas}</td></tr>
-                <tr><td><strong>Kemiringan:</strong></td><td>${p.kemiringan}</td></tr>
-                <tr><td><strong>Jenis Tanah:</strong></td><td>${p.jenis_tanah}</td></tr>
-                <tr><td><strong>Curah Hujan:</strong></td><td>${p.curah_hujan}</td></tr>
-                </table>`;
-            } else if (t === 'l') {
-                h += `<h3 style="margin: 0 0 12px 0; color: #2c3e50; font-size: 16px; border-bottom: 2px solid #3498db; padding-bottom: 8px;">💧 ${p.nama}</h3>
-                <table style="width: 100%; font-size: 13px; line-height: 1.8;">
-                <tr><td><strong>Jenis:</strong></td><td>${p.jenis}</td></tr>
-                <tr><td><strong>Panjang:</strong></td><td>${p.panjang}</td></tr>
-                <tr><td><strong>Kondisi:</strong></td><td>${p.kondisi}</td></tr>
-                <tr><td><strong>Kapasitas:</strong></td><td>${p.kapasitas}</td></tr>
-                </table>`;
-            } else {
-                h += `<h3 style="margin: 0 0 12px 0; color: #2c3e50; font-size: 16px; border-bottom: 2px solid #27ae60; padding-bottom: 8px;">🌾 ${p.nama}</h3>
-                <table style="width: 100%; font-size: 13px; line-height: 1.8;">
-                <tr><td><strong>Jenis:</strong></td><td>${p.jenis}</td></tr>
-                <tr><td><strong>Luas:</strong></td><td>${p.luas}</td></tr>
-                <tr><td><strong>Status:</strong></td><td><span style="color: #27ae60; font-weight: bold;">${p.status}</span></td></tr>
-                <tr><td><strong>Komoditas:</strong></td><td>${p.komoditas}</td></tr>
-                </table>`;
-            }
-            return h + '</div>';
-        }
+      // Helper functions
+      function getMarkerColor(k) {
+        return k === "S1"
+          ? "#2ecc71"
+          : k === "S2"
+          ? "#3498db"
+          : k === "S3"
+          ? "#f39c12"
+          : "#e74c3c";
+      }
 
-        // Inisialisasi peta
-        const map = L.map('map').setView([-6.9278, 106.8278], 10);
+      function getMarkerIcon(k) {
+        return k === "S1" ? "🌟" : k === "S2" ? "✅" : k === "S3" ? "⚠️" : "❌";
+      }
 
-        // Base maps
-        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+      function getBadgeClass(k) {
+        return k === "S1"
+          ? "badge-s1"
+          : k === "S2"
+          ? "badge-s2"
+          : k === "S3"
+          ? "badge-s3"
+          : "badge-n";
+      }
 
-        const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: '© ESRI'
+      function getKesesuaianLabel(k) {
+        const labels = {
+          S1: "Sangat Sesuai",
+          S2: "Sesuai",
+          S3: "Sesuai Marginal",
+          N: "Tidak Sesuai",
+        };
+        return labels[k];
+      }
+
+      // Custom marker dengan icon dan animasi
+      function createCustomMarker(k) {
+        const color = getMarkerColor(k);
+        const icon = getMarkerIcon(k);
+        return L.divIcon({
+          className: "custom-marker",
+          html: `
+                    <div style="position: relative;">
+                        <div style="background: ${color}; width: 40px; height: 40px; border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                            ${icon}
+                        </div>
+                        <div style="position: absolute; top: -8px; right: -8px; width: 16px; height: 16px; background: #ff6b6b; border-radius: 50%; border: 2px solid white; animation: pulse 2s infinite;"></div>
+                    </div>
+                `,
+          iconSize: [40, 40],
+          iconAnchor: [20, 20],
+          popupAnchor: [0, -20],
         });
+      }
 
-        // Layers
-        const markers = L.geoJSON(titikAnalisisData, {
-            pointToLayer: (f, ll) => L.marker(ll, {icon: createCustomMarker(getMarkerColor(f.properties.kesesuaian))}),
-            onEachFeature: (f, l) => l.bindPopup(createPopup(f.properties, 'm'))
-        }).addTo(map);
+      // Tooltip content (hover)
+      function createTooltip(p) {
+        return `<strong>${p.nama}</strong><br>📊 ${getKesesuaianLabel(
+          p.kesesuaian
+        )}<br>🌾 ${p.komoditas}`;
+      }
 
-        const lines = L.geoJSON(jalurIrigasiData, {
-            style: {color: '#3498db', weight: 4, opacity: 0.8, dashArray: '10, 5'},
-            onEachFeature: (f, l) => {
-                l.bindPopup(createPopup(f.properties, 'l'));
-                l.on('mouseover', e => e.target.setStyle({weight: 6, opacity: 1}));
-                l.on('mouseout', e => e.target.setStyle({weight: 4, opacity: 0.8}));
+      // Popup content interaktif (klik)
+      function createInteractivePopup(p) {
+        return `
+                <div class="popup-header">
+                    ${getMarkerIcon(p.kesesuaian)} ${p.nama}
+                </div>
+                <div class="popup-body">
+                    <div style="text-align: center; margin-bottom: 12px;">
+                        <span class="popup-badge ${getBadgeClass(
+                          p.kesesuaian
+                        )}">
+                            ${getKesesuaianLabel(p.kesesuaian)}
+                        </span>
+                    </div>
+                    
+                    <div class="popup-row">
+                        <span class="popup-label">🌾 Komoditas:</span>
+                        <span class="popup-value">${p.komoditas}</span>
+                    </div>
+                    <div class="popup-row">
+                        <span class="popup-label">📏 Luas Lahan:</span>
+                        <span class="popup-value">${p.luas}</span>
+                    </div>
+                    <div class="popup-row">
+                        <span class="popup-label">📐 Kemiringan:</span>
+                        <span class="popup-value">${p.kemiringan}</span>
+                    </div>
+                    <div class="popup-row">
+                        <span class="popup-label">🌱 Jenis Tanah:</span>
+                        <span class="popup-value">${p.jenis_tanah}</span>
+                    </div>
+                    <div class="popup-row">
+                        <span class="popup-label">💧 Curah Hujan:</span>
+                        <span class="popup-value">${p.curah_hujan}</span>
+                    </div>
+                    <div class="popup-row">
+                        <span class="popup-label">📈 Produktivitas:</span>
+                        <span class="popup-value">${p.produktivitas}</span>
+                    </div>
+                    <div class="popup-row" style="border-bottom: none;">
+                        <span class="popup-label">💡 Rekomendasi:</span>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; font-size: 12px; color: #495057; line-height: 1.6; margin-top: 8px;">
+                        ${p.rekomendasi}
+                    </div>
+                    
+                    <div class="popup-actions">
+                        <button class="popup-btn btn-primary" onclick="zoomToZone(${
+                          p.id
+                        })">
+                            🔍 Zoom In
+                        </button>
+                        <button class="popup-btn btn-secondary" onclick="shareZone('${
+                          p.nama
+                        }')">
+                            📤 Bagikan
+                        </button>
+                    </div>
+                </div>
+            `;
+      }
+
+      // Popup untuk polyline
+      function createLinePopup(p) {
+        return `
+                <div class="popup-header">
+                    💧 ${p.nama}
+                </div>
+                <div class="popup-body">
+                    <div class="popup-row">
+                        <span class="popup-label">📋 Jenis:</span>
+                        <span class="popup-value">${p.jenis}</span>
+                    </div>
+                    <div class="popup-row">
+                        <span class="popup-label">📏 Panjang:</span>
+                        <span class="popup-value">${p.panjang}</span>
+                    </div>
+                    <div class="popup-row">
+                        <span class="popup-label">✅ Kondisi:</span>
+                        <span class="popup-value">${p.kondisi}</span>
+                    </div>
+                    <div class="popup-row">
+                        <span class="popup-label">⚡ Kapasitas:</span>
+                        <span class="popup-value">${p.kapasitas}</span>
+                    </div>
+                    <div class="popup-row">
+                        <span class="popup-label">📅 Tahun Pembangunan:</span>
+                        <span class="popup-value">${p.tahun}</span>
+                    </div>
+                    <div class="popup-actions">
+                        <button class="popup-btn btn-primary" onclick="alert('Fitur analisis jalur irigasi')">
+                            📊 Analisis
+                        </button>
+                    </div>
+                </div>
+            `;
+      }
+
+      // Popup untuk polygon
+      function createPolygonPopup(p) {
+        return `
+                <div class="popup-header">
+                    🌾 ${p.nama}
+                </div>
+                <div class="popup-body">
+                    <div class="popup-row">
+                        <span class="popup-label">📋 Jenis:</span>
+                        <span class="popup-value">${p.jenis}</span>
+                    </div>
+                    <div class="popup-row">
+                        <span class="popup-label">📏 Luas:</span>
+                        <span class="popup-value">${p.luas}</span>
+                    </div>
+                    <div class="popup-row">
+                        <span class="popup-label">✅ Status:</span>
+                        <span class="popup-value" style="color: #27ae60; font-weight: bold;">${p.status}</span>
+                    </div>
+                    <div class="popup-row">
+                        <span class="popup-label">🌾 Komoditas:</span>
+                        <span class="popup-value">${p.komoditas}</span>
+                    </div>
+                    <div class="popup-row">
+                        <span class="popup-label">👨‍🌾 Jumlah Petani:</span>
+                        <span class="popup-value">${p.petani}</span>
+                    </div>
+                    <div class="popup-actions">
+                        <button class="popup-btn btn-primary" onclick="alert('Detail statistik kawasan')">
+                            📈 Statistik
+                        </button>
+                    </div>
+                </div>
+            `;
+      }
+
+      // Inisialisasi peta
+      const map = L.map("map").setView([-6.9278, 106.8278], 10);
+
+      // Base maps
+      const osm = L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          attribution: "© OpenStreetMap contributors",
+        }
+      ).addTo(map);
+
+      const sat = L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        {
+          attribution: "© ESRI",
+        }
+      );
+
+      // Create marker layers dengan tooltip dan popup interaktif
+      const markers = L.geoJSON(titikAnalisisData, {
+        pointToLayer: (f, ll) => {
+          const marker = L.marker(ll, {
+            icon: createCustomMarker(f.properties.kesesuaian),
+            riseOnHover: true,
+          });
+
+          // Tooltip (hover)
+          marker.bindTooltip(createTooltip(f.properties), {
+            permanent: false,
+            direction: "top",
+            offset: [0, -20],
+          });
+
+          // Popup (klik)
+          marker.bindPopup(createInteractivePopup(f.properties), {
+            className: "custom-popup",
+            maxWidth: 300,
+          });
+
+          // Event listeners
+          marker.on("mouseover", function (e) {
+            updateInteraction();
+            addLog(`👁️ Melihat: ${f.properties.nama}`);
+            this.getElement().style.transform = "scale(1.2)";
+            this.getElement().style.transition = "transform 0.3s";
+          });
+
+          marker.on("mouseout", function (e) {
+            this.getElement().style.transform = "scale(1)";
+          });
+
+          marker.on("click", function (e) {
+            updateInteraction();
+            addLog(`🖱️ Klik: ${f.properties.nama}`);
+            map.setView(e.latlng, 13, { animate: true, duration: 0.5 });
+          });
+
+          allMarkers.push({ marker: marker, properties: f.properties });
+          return marker;
+        },
+      }).addTo(map);
+
+      // Polyline dengan tooltip dan interaksi
+      const lines = L.geoJSON(jalurIrigasiData, {
+        style: {
+          color: "#3498db",
+          weight: 4,
+          opacity: 0.8,
+          dashArray: "10, 5",
+        },
+        onEachFeature: (f, l) => {
+          l.bindTooltip(
+            `<strong>${f.properties.nama}</strong><br>💧 ${f.properties.jenis}`,
+            {
+              permanent: false,
+              direction: "center",
             }
-        }).addTo(map);
+          );
 
-        const polys = L.geoJSON(zonaAreaData, {
-            style: {fillColor: '#2ecc71', fillOpacity: 0.3, color: '#27ae60', weight: 2, opacity: 0.8},
-            onEachFeature: (f, l) => {
-                l.bindPopup(createPopup(f.properties, 'p'));
-                l.on('mouseover', e => e.target.setStyle({fillOpacity: 0.5, weight: 3}));
-                l.on('mouseout', e => e.target.setStyle({fillOpacity: 0.3, weight: 2}));
+          l.bindPopup(createLinePopup(f.properties), {
+            className: "custom-popup",
+            maxWidth: 300,
+          });
+
+          l.on("mouseover", function (e) {
+            updateInteraction();
+            addLog(`👁️ Melihat: ${f.properties.nama}`);
+            e.target.setStyle({ weight: 6, opacity: 1, color: "#2980b9" });
+          });
+
+          l.on("mouseout", function (e) {
+            e.target.setStyle({ weight: 4, opacity: 0.8, color: "#3498db" });
+          });
+
+          l.on("click", function (e) {
+            updateInteraction();
+            addLog(`🖱️ Klik: ${f.properties.nama}`);
+          });
+        },
+      }).addTo(map);
+
+      // Polygon dengan tooltip dan interaksi
+      const polys = L.geoJSON(zonaAreaData, {
+        style: {
+          fillColor: "#2ecc71",
+          fillOpacity: 0.3,
+          color: "#27ae60",
+          weight: 2,
+          opacity: 0.8,
+        },
+        onEachFeature: (f, l) => {
+          l.bindTooltip(
+            `<strong>${f.properties.nama}</strong><br>📏 ${f.properties.luas}`,
+            {
+              permanent: false,
+              direction: "center",
             }
-        }).addTo(map);
+          );
 
-        // Layer control
-        L.control.layers(
-            {"🗺️ OpenStreetMap": osm, "🛰️ Satellite": sat},
-            {"📍 Titik Analisis Lahan": markers, "💧 Jalur Irigasi": lines, "🌾 Zona Pertanian": polys},
-            {position: 'topright', collapsed: false}
-        ).addTo(map);
+          l.bindPopup(createPolygonPopup(f.properties), {
+            className: "custom-popup",
+            maxWidth: 300,
+          });
 
-        // Scale
-        L.control.scale({position: 'bottomleft', metric: true, imperial: false}).addTo(map);
+          l.on("mouseover", function (e) {
+            updateInteraction();
+            addLog(`👁️ Melihat: ${f.properties.nama}`);
+            e.target.setStyle({
+              fillOpacity: 0.6,
+              weight: 3,
+              color: "#229954",
+            });
+          });
 
-        console.log('✅ Peta berhasil dimuat!');
+          l.on("mouseout", function (e) {
+            e.target.setStyle({
+              fillOpacity: 0.3,
+              weight: 2,
+              color: "#27ae60",
+            });
+          });
+
+          l.on("click", function (e) {
+            updateInteraction();
+            addLog(`🖱️ Klik: ${f.properties.nama}`);
+          });
+        },
+      }).addTo(map);
+
+      // Layer control
+      L.control
+        .layers(
+          { "🗺️ OpenStreetMap": osm, "🛰️ Satellite": sat },
+          {
+            "📍 Titik Analisis Lahan": markers,
+            "💧 Jalur Irigasi": lines,
+            "🌾 Zona Pertanian": polys,
+          },
+          { position: "topright", collapsed: false }
+        )
+        .addTo(map);
+
+      // Scale
+      L.control
+        .scale({ position: "bottomleft", metric: true, imperial: false })
+        .addTo(map);
+
+      // Custom event untuk layer control
+      map.on("baselayerchange", function (e) {
+        addLog(`🗺️ Ganti base map: ${e.name}`);
+      });
+
+      map.on("overlayadd", function (e) {
+        addLog(`➕ Tampilkan layer: ${e.name}`);
+      });
+
+      map.on("overlayremove", function (e) {
+        addLog(`➖ Sembunyikan layer: ${e.name}`);
+      });
+
+      // Fungsi untuk filter berdasarkan kelas
+      function filterByClass(kelas) {
+        addLog(`🔍 Filter zona kesesuaian: ${kelas}`);
+
+        allMarkers.forEach((item) => {
+          if (item.properties.kesesuaian === kelas) {
+            map.addLayer(item.marker);
+            item.marker.getElement().classList.add("marker-bounce");
+            setTimeout(() => {
+              item.marker.getElement().classList.remove("marker-bounce");
+            }, 1000);
+          } else {
+            map.removeLayer(item.marker);
+          }
+        });
+      }
+
+      // Reset filter
+      function resetFilter() {
+        addLog(`🔄 Reset filter - Tampilkan semua zona`);
+        allMarkers.forEach((item) => {
+          map.addLayer(item.marker);
+        });
+      }
+
+      // Zoom to specific zone
+      function zoomToZone(id) {
+        const zone = allMarkers.find((item) => item.properties.id === id);
+        if (zone) {
+          const coords = zone.marker.getLatLng();
+          map.setView(coords, 14, { animate: true, duration: 1 });
+          addLog(`🎯 Zoom ke: ${zone.properties.nama}`);
+
+          // Add bounce animation
+          setTimeout(() => {
+            zone.marker.getElement().classList.add("marker-bounce");
+            setTimeout(() => {
+              zone.marker.getElement().classList.remove("marker-bounce");
+            }, 1000);
+          }, 500);
+        }
+      }
+
+      // Share zone
+      function shareZone(nama) {
+        const message = `Lihat zona "${nama}" di Sistem Analisis Kesesuaian Lahan Pertanian Sukabumi`;
+        if (navigator.share) {
+          navigator
+            .share({
+              title: "Analisis Lahan Pertanian",
+              text: message,
+            })
+            .then(() => {
+              addLog(`📤 Berbagi: ${nama}`);
+            })
+            .catch(() => {});
+        } else {
+          alert(message);
+          addLog(`📤 Info dibagikan: ${nama}`);
+        }
+      }
+
+      // Event listener untuk zoom
+      map.on("zoomend", function () {
+        const zoom = map.getZoom();
+        addLog(`🔎 Zoom level: ${zoom}`);
+      });
+
+      // Event listener untuk drag
+      map.on("moveend", function () {
+        const center = map.getCenter();
+        addLog(
+          `🗺️ Pindah ke: ${center.lat.toFixed(4)}, ${center.lng.toFixed(4)}`
+        );
+      });
+
+      // Initial log
+      addLog("✅ Peta berhasil dimuat dengan 15 layer");
+      addLog("🎯 Siap untuk analisis interaktif");
+
+      console.log("✅ Peta interaktif berhasil dimuat!");
+      console.log("📊 Total Markers:", allMarkers.length);
+      console.log("💧 Total Jalur Irigasi:", jalurIrigasiData.features.length);
+      console.log("🌾 Total Zona Pertanian:", zonaAreaData.features.length);
     </script>
-</body>
+  </body>
 </html>
